@@ -160,29 +160,52 @@ class stat_primes:
 
 
 if __name__ == "__main__":
-    start = time.time()
-    import cProfile, pstats, io
-    from pstats import SortKey
-    pr = cProfile.Profile()
-    pr.enable()
+    snakeviz_to_do = False
+    if snakeviz_to_do:
+        start = time.time()
+        import cProfile, pstats, io
+        from pstats import SortKey
+        pr = cProfile.Profile()
+        pr.enable()
+        
+        # ... do something ...
+        # 1: 
+        #1: 2:156   3:108.7   4:107.9   5:107.28
+        stat = stat_primes(fname="C:/Users/mmelkowski/Downloads/bigListe.txt", nb_thread_process = 4)
+        #stat = stat_primes(fname="C:/Users/mmelkowski/.spyder-py3/Exo/primes.txt", nb_thread_process = 3)
     
-    # ... do something ...
-    # 1: 
-    #1: 2:156   3:108.7   4:107.9   5:107.28
-    stat = stat_primes(fname="C:/Users/mmelkowski/Downloads/bigListe.txt", nb_thread_process = 4)
-    #stat = stat_primes(fname="C:/Users/mmelkowski/.spyder-py3/Exo/primes.txt", nb_thread_process = 3)
-
+        pr.disable()
+        s = io.StringIO()
+        sortby = SortKey.CUMULATIVE
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+        #print(s.getvalue())
+        pr.dump_stats("profile_snakeviz_file.prof")
+        
+        #Follow
+        stat.close_file()
+        stat.primes_into_df()
+        stat.mean_primes()
+        end = time.time() - start
+        print(end)
     
-    pr.disable()
-    s = io.StringIO()
-    sortby = SortKey.CUMULATIVE
-    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-    ps.print_stats()
-    #print(s.getvalue())
-    pr.dump_stats("profile_file.prof")
+    else:
+        start = time.time()
+        stat = stat_primes(fname="C:/Users/mmelkowski/Downloads/bigListe.txt", nb_thread_process = 4)
+        #stat = stat_primes(fname="C:/Users/mmelkowski/.spyder-py3/Exo/primes.txt", nb_thread_process = 3)
+        stat.close_file()
+        stat.primes_into_df()
+        stat.mean_primes()
+        end = time.time() - start
     
-    stat.close_file()
-    stat.primes_into_df()
-    stat.mean_primes()
-    end = time.time() - start
-    print(end)
+    graph = False
+    if graph:
+        import numpy as np
+        import matplotlib.pyplot as plt
+        with plt.xkcd():
+            T = np.array([1,2,3,4,5])
+            S = np.array([186,156,108.7,107.9, 107.28])
+            
+            plt.scatter(T,S, c="firebrick", zorder = 1)
+            plt.plot(T,S, zorder = 0)
+            plt.show()
