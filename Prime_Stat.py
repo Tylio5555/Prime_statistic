@@ -44,22 +44,6 @@ class stat_primes:
     def close_file(self):
         self.f.close()
 
-    def count_block(self, block):
-        #dico_count = self.dico.copy()
-        dico_count ={'1':{'1':0, '3':0, '7':0, '9':0},
-                     '3':{'1':0, '3':0, '7':0, '9':0},
-                     '7':{'1':0, '3':0, '7':0, '9':0},
-                     '9':{'1':0, '3':0, '7':0, '9':0}
-                     }
-        i=1
-        val = block[i-1][-2]
-        while i < len(block):
-            follow = block[i][-2]
-            dico_count[val][follow] += 1
-            val = follow
-            i+=1
-        return dico_count
-
     def count_block_into_dico(self, dico_count, block):
         i=1
         val = block[i-1][-2]
@@ -92,7 +76,9 @@ class stat_primes:
                       '7':{'1':0, '3':0, '7':0, '9':0},
                       '9':{'1':0, '3':0, '7':0, '9':0}
                       }
-        while self.f_line_to_do: #True:
+
+        while (self.f_line_to_do or not self.block_list.empty()):
+            # Retreive the block of prime number to process
             if not self.block_list.empty():
                 try:
                     block = self.block_list.get(False)
@@ -100,21 +86,20 @@ class stat_primes:
                     block = []
             else:
                 block = []
-
-            if block != []:
-                # Run the stat job with the available block in queue (thread)
+            
+            # If block is not empty -> count_block_into_dico
+            if block:
                 dico_count = self.count_block_into_dico(dico_count, block)
-
+        
+        # After the file is complet
         with self.add_lock:      # ADD_LOCK
             self.add_count(dico_count)
-    #           ########################################
-    # MAIN
+
     def main(self):
+        # Thread Lock for adding result in final_dict
         self.add_lock  = threading.Lock()
-        #self.list_lock = threading.Lock()
         
         list_thread = []
-        
         
         # THREAD FOR READING:
         t = threading.Thread(target=self.create_block)
@@ -133,13 +118,9 @@ class stat_primes:
         
         for t in list_thread:
             t.join()
-
-    #           ########################################       
-    # post calcul 
     
     def primes_into_df(self):
         self.prime_dataframe = pds.DataFrame(self.final_dict).T
-        
         
     def mean_primes(self):
         self.prime_count = self.prime_dataframe
@@ -158,7 +139,6 @@ class stat_primes:
  '9': {'1': 84596, '3': 64371, '7': 58130, '9': 42843}}
 """
 
-
 if __name__ == "__main__":
     snakeviz_to_do = False
     if snakeviz_to_do:
@@ -169,10 +149,8 @@ if __name__ == "__main__":
         pr.enable()
         
         # ... do something ...
-        # 1: 
-        #1: 2:156   3:108.7   4:107.9   5:107.28
-        stat = stat_primes(fname="C:/Users/mmelkowski/Downloads/bigListe.txt", nb_thread_process = 4)
-        #stat = stat_primes(fname="C:/Users/mmelkowski/.spyder-py3/Exo/primes.txt", nb_thread_process = 3)
+        #stat = stat_primes(fname="C:/Users/mmelkowski/Downloads/bigListe.txt", nb_thread_process = 4)
+        stat = stat_primes(fname="C:/Users/mmelkowski/.spyder-py3/Exo/primes.txt", nb_thread_process = 2)
     
         pr.disable()
         s = io.StringIO()
@@ -191,12 +169,13 @@ if __name__ == "__main__":
     
     else:
         start = time.time()
-        stat = stat_primes(fname="C:/Users/mmelkowski/Downloads/bigListe.txt", nb_thread_process = 4)
-        #stat = stat_primes(fname="C:/Users/mmelkowski/.spyder-py3/Exo/primes.txt", nb_thread_process = 3)
+        #stat = stat_primes(fname="C:/Users/mmelkowski/Downloads/bigListe.txt", nb_thread_process = 4)
+        stat = stat_primes(fname="C:/Users/mmelkowski/.spyder-py3/Exo/primes.txt", nb_thread_process = 3)
         stat.close_file()
         stat.primes_into_df()
         stat.mean_primes()
         end = time.time() - start
+        print(end)
     
     graph = False
     if graph:
