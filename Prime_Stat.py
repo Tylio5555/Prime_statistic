@@ -153,7 +153,7 @@ if __name__ == "__main__":
 
         # ... do something ...
         #stat = stat_primes(fname="C:/Users/mmelkowski/Downloads/bigListe.txt", nb_thread_process = 4)
-        stat = stat_primes(fname="primes.txt", nb_thread_process = 2)
+        stat = stat_primes(fname="primes.txt", nb_thread_process=4)
 
         pr.disable()
         s = io.StringIO()
@@ -173,7 +173,7 @@ if __name__ == "__main__":
     else:
         start = time.time()
         #stat = stat_primes(fname="C:/Users/mmelkowski/Downloads/bigListe.txt", nb_thread_process = 4)
-        stat = stat_primes("primes.txt", nb_thread_process = 3)
+        stat = stat_primes("primes.txt", nb_thread_process=4)
         stat.close_file()
         stat.primes_into_df()
         stat.mean_primes()
